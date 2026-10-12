@@ -4,7 +4,7 @@ Text2AI is a prototype for an SMS-first research assistant. A gateway phone rece
 
 ## Current checkpoint
 
-**Phase 4 — Android SMS gateway implemented; device build and live handset verification pending.** The Android app pairs over HTTPS, stores its gateway token encrypted with Android Keystore, forwards incoming SMS with HMAC authentication, and runs a user-started foreground service that sends queued replies and acknowledges them. This workspace has not produced an APK or verified operation on a handset.
+**Phase 4 — Android SMS gateway implemented and debug APK built; live handset verification pending.** The Android app pairs over HTTPS, stores its gateway token encrypted with Android Keystore, forwards incoming SMS with HMAC authentication, and runs a user-started foreground service that sends queued replies and acknowledges them. The debug APK builds with the Gradle wrapper; pairing and SMS delivery still need verification on a phone with a SIM and a reachable HTTPS backend.
 
 **Phase 3 — research core implemented; live credentials still required.** Research now runs through TinyFish Search/Fetch and Anthropic JSON synthesis, ranks official domains, retains verified citations, reports staged progress over SSE, and returns an explicit fallback rather than invented evidence when a provider fails. The dashboard consumes the progress stream. Add live provider credentials before expecting completed live answers.
 
@@ -71,4 +71,4 @@ See [.env.example](./.env.example) for defaults and descriptions. To enable live
 
 ## Android APK
 
-The Android gateway code is implemented, but no APK has been built in this workspace because the Android SDK/JDK are unavailable and this scaffold has no functional Gradle wrapper. See [android-gateway/README.md](./android-gateway/README.md) for requirements and build steps.
+The debug APK is generated at `android-gateway\app\build\outputs\apk\debug\app-debug.apk` after building with the instructions in [android-gateway/README.md](./android-gateway/README.md). The APK is a debug build; install it on a compatible phone to verify pairing and SMS delivery.

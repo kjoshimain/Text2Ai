@@ -4,7 +4,7 @@ The Android app receives SMS, authenticates and forwards inbound messages to the
 
 ## Requirements
 
-- Android Studio or Android SDK 34
+- Android SDK Platform 34 and Build Tools 34.0.0
 - JDK 17+
 - A spare Android phone with a SIM for SMS delivery
 - A publicly reachable backend configured with HTTPS
@@ -36,7 +36,7 @@ The receiver forwards complete SMS bodies with an idempotent message ID and HMAC
 
 ## Build
 
-The scaffold does not include a functioning Gradle wrapper. Install JDK 17, Android SDK 34, and Gradle 8.7+, then run `gradle :app:assembleDebug` from this directory. The debug APK is normally written to `app\build\outputs\apk\debug\app-debug.apk`.
+From this directory, run `.\gradlew.bat :app:assembleDebug`. The wrapper downloads Gradle 8.7 on the first build. The debug APK is written to `app\build\outputs\apk\debug\app-debug.apk`.
 
 ## Security and operating limits
 
