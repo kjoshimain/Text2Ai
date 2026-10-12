@@ -1,0 +1,93 @@
+:root {
+  font-family: Inter, system-ui, sans-serif;
+  color: #e5eef8;
+  background: #07111e;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #07111e 0%, #0d1d2d 100%);
+}
+
+.app-shell {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 2rem 1rem 3rem;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 2.5rem;
+}
+
+header p {
+  color: #9ec3e8;
+}
+
+.panel {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+form, .result-panel {
+  background: rgba(17, 31, 47, 0.8);
+  border: 1px solid rgba(148, 177, 212, 0.2);
+  border-radius: 18px;
+  padding: 1.25rem;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+textarea {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid #2e4b68;
+  background: #0a1827;
+  color: #e5eef8;
+  padding: 0.9rem;
+  resize: vertical;
+}
+
+button {
+  margin-top: 1rem;
+  background: #3aa0ff;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 0.75rem 1.25rem;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.result-panel h2 {
+  margin-top: 0;
+}
+
+.meta {
+  margin: 0.4rem 0;
+  color: #a8d9ff;
+}
+
+footer {
+  margin-top: 1.5rem;
+  color: #a4bfd7;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+@media (max-width: 700px) {
+  .panel {
+    grid-template-columns: 1fr;
+  }
+}
