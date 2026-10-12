@@ -1,58 +1,74 @@
 # Text2AI
 
-Text2AI is a hackathon-ready prototype for an AI-powered SMS research assistant. It receives SMS questions, researches the live web, synthesizes a source-backed answer in the user's language, and sends a concise reply back by SMS.
+Text2AI is a prototype for an SMS-first research assistant. A gateway phone receives a question, forwards it to the backend, and sends the eventual reply back to the sender. A web dashboard will share the backend research pipeline.
 
-## Features
+## Current checkpoint
 
-- Node.js backend with Express and shared research pipeline
-- React + Vite dashboard
-- Android gateway app skeleton for SMS handling and outbox polling
-- TinyFish integration in `backend/src/services/tinyfish.js`
-- LLM abstraction in `backend/src/services/llm.js`
-- In-memory store fallback when Supabase is not configured
-- SMS segmentation and formatting utilities for English and Hindi
-- Research progress streaming via SSE
+**Phase 4 — Android SMS gateway implemented; device build and live handset verification pending.** The Android app pairs over HTTPS, stores its gateway token encrypted with Android Keystore, forwards incoming SMS with HMAC authentication, and runs a user-started foreground service that sends queued replies and acknowledges them. This workspace has not produced an APK or verified operation on a handset.
+
+**Phase 3 — research core implemented; live credentials still required.** Research now runs through TinyFish Search/Fetch and Anthropic JSON synthesis, ranks official domains, retains verified citations, reports staged progress over SSE, and returns an explicit fallback rather than invented evidence when a provider fails. The dashboard consumes the progress stream. Add live provider credentials before expecting completed live answers.
+
+**Phase 2 — backend foundation.** The API, in-memory/Supabase store adapters, SMS adapter interfaces, gateway pairing/auth/outbox/ack flow, input validation, rate limiting, privacy-aware request logs, and backend utility tests are implemented.
 
 ## Quick start
 
-1. Copy `.env.example` to `.env` and set the env values you need.
-2. Install backend dependencies:
-   npm --prefix backend install
-3. Install frontend dependencies:
-   npm --prefix frontend install
-4. Start the app:
-   npm run dev
-5. Open the dashboard at `http://localhost:5173`
+Requirements: Node.js LTS and npm.
 
-## Manual setup and API keys
+```powershell
+Copy-Item .env.example .env
+npm install
+npm --prefix backend install
+npm --prefix frontend install
+npm run dev
+```
 
-The app runs without a full live stack when `TINYFISH_MODE=mock` and `LLM_PROVIDER=mock` are used. To enable the live web research layer, provide:
+The backend listens on `http://localhost:3001`; the Vite dashboard is at `http://localhost:5173`. The backend foundation and mock SMS adapter run without external credentials. Optional Supabase persistence is enabled only when both `SUPABASE_URL` and `SUPABASE_KEY` are configured; otherwise the process uses memory storage.
 
-- TinyFish CLI or API access and a valid `TINYFISH_API_KEY`
-- LLM access via `LLM_PROVIDER`, `LLM_API_KEY`, and `LLM_MODEL`
-- Optional Supabase credentials for persistence
-- Optional Twilio credentials for SMS sending via the Twilio adapter
+## Backend API foundation
 
-If any required live integration keys are missing, the project keeps running in mock mode and reports the integration as unavailable in `/api/health`.
+- `GET /api/health` — reports the active store and integration configuration booleans.
+- `POST /api/gateway/pairing-code` — generate a short-lived one-time code; requires `X-Gateway-Admin-Key`.
+- `POST /api/gateway/pair` — exchange a code for a per-device token.
+- `POST /api/gateway/inbound` — receive a signed gateway SMS request and acknowledge it before async processing.
+- `GET /api/gateway/outbox` — authenticated long-poll for queued messages.
+- `POST /api/gateway/ack` — report sent, delivered, or failed.
+- `GET /api/gateway/devices` and `POST /api/gateway/devices/:deviceId/revoke` — inspect/revoke device status; both require `X-Gateway-Admin-Key`.
+- `POST /api/simulate-sms` — dashboard simulator endpoint.
+- `POST /api/research` — starts a research run and returns `202` with a `runId`.
+- `GET /api/research/:runId/stream` — Server-Sent Events for stage progress and the final source-backed result.
+- `GET /api/conversations` and `GET /api/conversations/:id` — conversation records.
 
-## Privacy note
+Gateway inbound, outbox, and ack calls use `Authorization: Bearer <device-token>` and `X-Device-Signature: <hex HMAC-SHA256 of exact request body>`. For outbox GET, the signature is the HMAC of an empty string. The token is stored hashed in the backend store.
 
-Phone numbers are masked in logs and stored as hashed values. Full SMS bodies are not logged at info level. The app never logs API keys.
+## Environment variables
 
-## Repository layout
+See [.env.example](./.env.example) for defaults and descriptions. To enable live research, configure `TINYFISH_API_KEY`, `LLM_PROVIDER=anthropic`, and `LLM_API_KEY` in the backend process environment or backend `.env`; `LLM_MODEL` is optional. Real integration keys belong only in the backend `.env`; never place them in the frontend or Android app. With the example `mock` LLM provider or missing credentials, the service returns an explicit fallback and does not claim to have completed research.
 
-- `backend/` Node.js API and shared research service
-- `frontend/` React dashboard
-- `android-gateway/` Android SMS gateway skeleton
-- `supabase/` optional schema for persistent storage
-- `docs/` project brief and demo notes
+## Privacy and security
+
+- Phone numbers are normalized for storage lookup, hashed in conversation records, and masked in logs.
+- Request logs contain request IDs, route, status, duration, and client IP only; they do not log request bodies, SMS content, authorization headers, or keys.
+- Device tokens are returned only at pairing time, stored as hashes by the backend, and encrypted with Android Keystore on the gateway phone. Gateway endpoints verify both the token and HMAC signature.
+- Pairing-code issuance and device administration require a backend-only `GATEWAY_PAIRING_SECRET` (minimum 32 bytes); do not enter or embed it in the Android app.
+- Inbound SMS IDs are deduplicated through the configured retention window. Without an SMS ID, a hash of normalized phone and message text is deduplicated for two minutes.
+- Gateway replies expire from the outbox after the configured interval; conversation/message retention cleanup runs at startup and daily.
+- SMS itself is not end-to-end encrypted. Configure HTTPS for a deployed backend.
+- Protect the pairing-code and device-administration endpoints with a random backend-only `GATEWAY_PAIRING_SECRET`; the Android app must never receive that secret. See [android-gateway/README.md](./android-gateway/README.md) for the pairing procedure.
+
+## Repository
+
+- `backend/` Express API, stores, SMS adapters, utilities, and tests
+- `frontend/` React + Vite dashboard scaffold
+- `android-gateway/` Android SMS gateway app
+- `supabase/schema.sql` optional Supabase tables and cleanup function
+- `docs/` product and demo notes
 
 ## Scripts
 
-- `npm run dev` starts backend and frontend together
-- `npm test` runs backend tests
-- `npm start` starts the backend only
+- `npm run dev` — start backend and frontend
+- `npm test` — run backend unit/integration tests
+- `npm start` — start backend
 
-## Android APK note
+## Android APK
 
-The Android project is scaffolded. Run `./gradlew assembleDebug` inside `android-gateway/` when the Android SDK is installed. If the SDK is not available, the command will fail and CI becomes the fallback validation path.
+The Android gateway code is implemented, but no APK has been built in this workspace because the Android SDK/JDK are unavailable and this scaffold has no functional Gradle wrapper. See [android-gateway/README.md](./android-gateway/README.md) for requirements and build steps.

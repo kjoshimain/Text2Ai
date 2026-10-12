@@ -7,5 +7,9 @@ android-gateway/local.properties
 android-gateway/**/build/
 .env
 .env.local
+.env.*
+!.env.example
+*.jks
+*.keystore
 npm-debug.log*
 .DS_Store
