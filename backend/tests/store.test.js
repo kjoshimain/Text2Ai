@@ -1,5 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import {
   ackOutboundMessage,
   claimInboundDedupe,
@@ -13,6 +15,26 @@ import {
   saveMessage,
   waitForOutbox,
 } from '../src/services/store/memory.js';
+
+test('production refuses to start with the ephemeral in-memory store', () => {
+  const result = spawnSync(
+    process.execPath,
+    ['--input-type=module', '-e', "import './src/services/store/index.js';"],
+    {
+      cwd: fileURLToPath(new URL('../', import.meta.url)),
+      env: {
+        ...process.env,
+        NODE_ENV: 'production',
+        SUPABASE_URL: '',
+        SUPABASE_KEY: '',
+      },
+      encoding: 'utf8',
+    },
+  );
+
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /SUPABASE_URL and SUPABASE_KEY are required in production/);
+});
 
 test('pairing codes are short lived and single use', () => {
   resetMemoryStore();

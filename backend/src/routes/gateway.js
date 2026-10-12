@@ -26,6 +26,7 @@ import { hashPhone, maskPhone, normalizePhone } from '../utils/phone.js';
 import { hashSecret, safeEqual, verifyHmac } from '../utils/security.js';
 import { splitSmsMessage } from '../utils/smsSegments.js';
 import { FixedWindowRateLimiter } from '../utils/rateLimit.js';
+import { retainBackgroundTask } from '../utils/background.js';
 
 const router = express.Router();
 const phoneLimiter = new FixedWindowRateLimiter({
@@ -184,7 +185,7 @@ router.post('/inbound', authenticateGateway, async (req, res, next) => {
     }
 
     res.status(202).json({ ok: true, received: true, conversationId: conversation.id });
-    setImmediate(async () => {
+    const task = (async () => {
       let answer;
       try {
         if (body.toUpperCase() === 'HELP') answer = HELP_REPLY;
@@ -212,7 +213,8 @@ router.post('/inbound', authenticateGateway, async (req, res, next) => {
           phone: phoneMasked,
         }, 'Inbound SMS processing failed');
       }
-    });
+    })();
+    retainBackgroundTask(task);
     return undefined;
   } catch (error) {
     return next(error);

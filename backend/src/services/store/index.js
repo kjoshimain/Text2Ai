@@ -7,6 +7,9 @@ const hasSupabaseKey = Boolean(env.supabaseKey);
 if (hasSupabaseUrl !== hasSupabaseKey) {
   throw new Error('Set both SUPABASE_URL and SUPABASE_KEY, or leave both empty to use the in-memory store.');
 }
+if (env.nodeEnv === 'production' && !hasSupabaseUrl) {
+  throw new Error('SUPABASE_URL and SUPABASE_KEY are required in production; in-memory storage is not durable across serverless invocations.');
+}
 
 export const store = hasSupabaseUrl ? supabaseStore : memoryStore;
 export const activeStore = hasSupabaseUrl ? 'supabase' : 'memory';

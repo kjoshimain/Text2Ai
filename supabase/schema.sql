@@ -88,6 +88,14 @@ CREATE TABLE IF NOT EXISTS sms_outbox (
 CREATE INDEX IF NOT EXISTS sms_outbox_device_status_expiry_idx
   ON sms_outbox(device_id, status, expires_at);
 
+ALTER TABLE conversations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE research_runs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE devices ENABLE ROW LEVEL SECURITY;
+ALTER TABLE pairing_codes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE inbound_dedupe ENABLE ROW LEVEL SECURITY;
+ALTER TABLE sms_outbox ENABLE ROW LEVEL SECURITY;
+
 CREATE OR REPLACE FUNCTION cleanup_expired_data(retention_days INTEGER DEFAULT 30)
 RETURNS JSONB LANGUAGE plpgsql AS $$
 DECLARE
@@ -120,3 +128,22 @@ BEGIN
   );
 END;
 $$;
+
+GRANT USAGE ON SCHEMA public TO service_role;
+REVOKE ALL ON ALL TABLES IN SCHEMA public FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON ALL SEQUENCES IN SCHEMA public FROM PUBLIC, anon, authenticated;
+GRANT ALL ON ALL TABLES IN SCHEMA public TO service_role;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO service_role;
+ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public
+  REVOKE ALL ON TABLES FROM PUBLIC, anon, authenticated;
+ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public
+  REVOKE ALL ON SEQUENCES FROM PUBLIC, anon, authenticated;
+ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public
+  GRANT ALL ON TABLES TO service_role;
+ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public
+  GRANT ALL ON SEQUENCES TO service_role;
+
+REVOKE ALL ON FUNCTION consume_pairing_code(TEXT) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION consume_pairing_code(TEXT) TO service_role;
+REVOKE ALL ON FUNCTION cleanup_expired_data(INTEGER) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION cleanup_expired_data(INTEGER) TO service_role;

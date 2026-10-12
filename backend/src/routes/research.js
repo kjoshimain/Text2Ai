@@ -1,6 +1,7 @@
 import express from 'express';
 import { v4 as uuid } from 'uuid';
 import { env } from '../config/env.js';
+import { retainBackgroundTask } from '../utils/background.js';
 import { runResearch, getStoredRun } from '../services/research.js';
 import { sendSms } from '../services/sms/index.js';
 import {
@@ -35,7 +36,7 @@ router.post('/', async (req, res, next) => {
 
     const runId = uuid();
     runStreams.set(runId, { clients: new Set(), events: [], complete: false });
-    setImmediate(async () => {
+    const task = (async () => {
       try {
         const result = await runResearch({ question: normalizedQuestion, lang }, (event) => {
           publishRunEvent(runId, event.type, event.payload);
@@ -60,7 +61,8 @@ router.post('/', async (req, res, next) => {
           cleanupTimer.unref();
         }
       }
-    });
+    })();
+    retainBackgroundTask(task);
     return res.status(202).json({ runId, status: 'accepted' });
   } catch (error) {
     return next(error);
