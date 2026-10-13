@@ -25,6 +25,7 @@ test('production refuses to start with the ephemeral in-memory store', () => {
       env: {
         ...process.env,
         NODE_ENV: 'production',
+        GATEWAY_PAIRING_SECRET: 'test-only-gateway-admin-secret-long-enough',
         SUPABASE_URL: '',
         SUPABASE_KEY: '',
       },
@@ -34,6 +35,25 @@ test('production refuses to start with the ephemeral in-memory store', () => {
 
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /SUPABASE_URL and SUPABASE_KEY are required in production/);
+});
+
+test('production refuses to start without the gateway administrator secret', () => {
+  const result = spawnSync(
+    process.execPath,
+    ['--input-type=module', '-e', "import './src/config/env.js';"],
+    {
+      cwd: fileURLToPath(new URL('../', import.meta.url)),
+      env: {
+        ...process.env,
+        NODE_ENV: 'production',
+        GATEWAY_PAIRING_SECRET: '',
+      },
+      encoding: 'utf8',
+    },
+  );
+
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /GATEWAY_PAIRING_SECRET is required in production/);
 });
 
 test('pairing codes are short lived and single use', () => {

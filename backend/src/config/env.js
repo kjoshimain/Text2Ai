@@ -71,6 +71,9 @@ if (env.port > 65_535) throw new Error('PORT must not exceed 65535');
 if (env.gatewayPairingSecret && Buffer.byteLength(env.gatewayPairingSecret, 'utf8') < 32) {
   throw new Error('GATEWAY_PAIRING_SECRET must be at least 32 bytes when configured');
 }
+if (env.nodeEnv === 'production' && !env.gatewayPairingSecret) {
+  throw new Error('GATEWAY_PAIRING_SECRET is required in production');
+}
 if (!/^\d{1,3}$/.test(env.defaultCountryCode)) {
   throw new Error('DEFAULT_COUNTRY_CODE must contain 1 to 3 digits');
 }

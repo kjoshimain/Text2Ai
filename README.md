@@ -8,6 +8,8 @@ Text2AI is a prototype for an SMS-first research assistant. A gateway phone rece
 
 **Phase 5 — Vercel deployment preparation started.** The backend now refuses to start in production with ephemeral in-memory storage. Deploying and pairing still require a Vercel project, a Supabase project, and provider credentials; see [docs/VERCEL_DEPLOYMENT.md](./docs/VERCEL_DEPLOYMENT.md).
 
+**Phase 6 — live deployment and end-to-end verification started.** Production startup now also requires the documented gateway administrator secret. Deploying and handset verification still require access to the Vercel and Supabase projects, provider credentials, and an Android phone with a SIM; see [docs/VERCEL_DEPLOYMENT.md](./docs/VERCEL_DEPLOYMENT.md).
+
 **Phase 3 — research core implemented; live credentials still required.** Research now runs through TinyFish Search/Fetch and Anthropic JSON synthesis, ranks official domains, retains verified citations, reports staged progress over SSE, and returns an explicit fallback rather than invented evidence when a provider fails. The dashboard consumes the progress stream. Add live provider credentials before expecting completed live answers.
 
 **Phase 2 — backend foundation.** The API, in-memory/Supabase store adapters, SMS adapter interfaces, gateway pairing/auth/outbox/ack flow, input validation, rate limiting, privacy-aware request logs, and backend utility tests are implemented.

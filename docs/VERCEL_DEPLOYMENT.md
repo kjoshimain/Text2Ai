@@ -2,6 +2,8 @@
 
 This guide deploys the Express backend so the Android gateway can pair with it over HTTPS. The gateway requires durable storage: Vercel instances are ephemeral, so production startup fails if Supabase is not configured. The backend registers its asynchronous research work with Vercel so that work continues after the inbound request has returned.
 
+Phase 6 is underway: production startup now fails if `GATEWAY_PAIRING_SECRET` is missing, as well as when durable Supabase storage is not configured. Live deployment and handset verification remain pending the external accounts, provider credentials, and a SIM-equipped Android phone.
+
 The schema enables row-level security and restricts Data API table and RPC access to the backend's `service_role`; the service-role key must stay in Vercel's server-side environment variables.
 
 ## 1. Create the Supabase project
