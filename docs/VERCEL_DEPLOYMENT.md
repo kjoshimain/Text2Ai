@@ -2,7 +2,7 @@
 
 This guide deploys the Express backend so the Android gateway can pair with it over HTTPS. The gateway requires durable storage: Vercel instances are ephemeral, so production startup fails if Supabase is not configured. The backend registers its asynchronous research work with Vercel so that work continues after the inbound request has returned.
 
-Phase 6 is underway: production startup now fails if `GATEWAY_PAIRING_SECRET` is missing, as well as when durable Supabase storage is not configured. Live deployment and handset verification remain pending the external accounts, provider credentials, and a SIM-equipped Android phone.
+Phase 5 is complete: the backend is deployed on Vercel with durable Supabase storage. The production health check confirms Supabase and gateway admin configuration, and TinyFish is enabled. Phase 6's live backend deployment is verified; handset pairing and SMS delivery still need a SIM-equipped Android phone. Anthropic/LLM synthesis and Twilio are not configured.
 
 The schema enables row-level security and restricts Data API table and RPC access to the backend's `service_role`; the service-role key must stay in Vercel's server-side environment variables.
 
@@ -59,4 +59,4 @@ Enter the HTTPS base URL and the returned one-time code in the Android app. The 
 
 ## Remaining live checks
 
-Deployment and handset verification require access to the Vercel and Supabase accounts, the research-provider credentials, and a physical Android phone with a SIM. Keep `Text2AI.apk` as the debug build for this phase; it is not a Play Store release.
+Verify pairing and SMS delivery end to end on a physical Android phone with a SIM. Configure `LLM_PROVIDER=anthropic` and `LLM_API_KEY` if synthesized, source-backed answers are needed; configure Twilio only if using that SMS provider. Keep `Text2AI.apk` as the debug build for this phase; it is not a Play Store release.
