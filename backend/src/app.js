@@ -107,3 +107,5 @@ export function createApp({ logger = pino({ level: env.logLevel }) } = {}) {
   app.locals.cleanup = async () => cleanupExpiredData({ retentionDays: env.retentionDays });
   return app;
 }
+
+export default createApp();
