@@ -28,7 +28,7 @@ export class FixedWindowRateLimiter {
       };
     }
     bucket.count += 1;
-    return { allowed: true, remaining: this.limit - bucket.count, retryAfterMs: 0 };
+    return { allowed: true, remaining: Math.max(this.limit - bucket.count, 0), retryAfterMs: 0 };
   }
 
   #prune(now) {

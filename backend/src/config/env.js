@@ -6,6 +6,10 @@ const configDirectory = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(configDirectory, '../../.env') });
 dotenv.config({ path: path.resolve(configDirectory, '../../../.env') });
 
+const isTestEnvironment = String(process.env.NODE_ENV || '').toLowerCase() === 'test'
+  || process.execArgv.some((arg) => arg.includes('--test'))
+  || process.argv.some((arg) => arg.includes('--test'));
+
 export const env = {
   port: Number(process.env.PORT || 3001),
   nodeEnv: process.env.NODE_ENV || 'development',
@@ -24,11 +28,11 @@ export const env = {
   outboxExpiryMs: Number(process.env.OUTBOX_EXPIRY_MS || 600000),
   retentionDays: Number(process.env.RETENTION_DAYS || 30),
   defaultCountryCode: process.env.DEFAULT_COUNTRY_CODE || '91',
-  tinyfishApiKey: process.env.TINYFISH_API_KEY || '',
+  tinyfishApiKey: isTestEnvironment ? '' : (process.env.TINYFISH_API_KEY || ''),
   tinyfishTimeoutMs: Number(process.env.TINYFISH_TIMEOUT_MS || 20000),
   tinyfishRetries: Number(process.env.TINYFISH_RETRIES || 2),
-  llmProvider: process.env.LLM_PROVIDER || 'mock',
-  llmApiKey: process.env.LLM_API_KEY || '',
+  llmProvider: isTestEnvironment ? 'mock' : (process.env.LLM_PROVIDER || 'mock'),
+  llmApiKey: isTestEnvironment ? '' : (process.env.LLM_API_KEY || ''),
   llmModel: process.env.LLM_MODEL || 'claude-sonnet-4-20250514',
   llmTimeoutMs: Number(process.env.LLM_TIMEOUT_MS || 15000),
   llmRetries: Number(process.env.LLM_RETRIES || 1),
