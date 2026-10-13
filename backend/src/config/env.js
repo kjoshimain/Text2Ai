@@ -9,6 +9,14 @@ dotenv.config({ path: path.resolve(configDirectory, '../../../.env') });
 const isTestEnvironment = String(process.env.NODE_ENV || '').toLowerCase() === 'test'
   || process.execArgv.some((arg) => arg.includes('--test'))
   || process.argv.some((arg) => arg.includes('--test'));
+const requestedOutboxLongPollMs = Number(process.env.OUTBOX_LONG_POLL_MS || 3000);
+const maxOutboxLongPollMs = 4000;
+if (!Number.isInteger(requestedOutboxLongPollMs) || requestedOutboxLongPollMs < 1) {
+  throw new Error('OUTBOX_LONG_POLL_MS must be a positive integer');
+}
+if (requestedOutboxLongPollMs > maxOutboxLongPollMs) {
+  console.warn(`OUTBOX_LONG_POLL_MS exceeds ${maxOutboxLongPollMs}ms; limiting it to protect serverless requests.`);
+}
 
 export const env = {
   port: Number(process.env.PORT || 3001),
@@ -24,7 +32,7 @@ export const env = {
   requestBodyLimit: process.env.REQUEST_BODY_LIMIT || '32kb',
   pairingCodeTtlMs: Number(process.env.PAIRING_CODE_TTL_MS || 600000),
   gatewayPairingSecret: process.env.GATEWAY_PAIRING_SECRET || '',
-  outboxLongPollMs: Number(process.env.OUTBOX_LONG_POLL_MS || 25000),
+  outboxLongPollMs: Math.min(requestedOutboxLongPollMs, maxOutboxLongPollMs),
   outboxExpiryMs: Number(process.env.OUTBOX_EXPIRY_MS || 600000),
   retentionDays: Number(process.env.RETENTION_DAYS || 30),
   defaultCountryCode: process.env.DEFAULT_COUNTRY_CODE || '91',

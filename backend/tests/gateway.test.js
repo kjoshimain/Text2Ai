@@ -153,6 +153,44 @@ test('gateway rejects missing auth and invalid HMAC signatures', async (t) => {
   assert.equal(response.status, 401);
 });
 
+test('gateway outbox returns promptly when there are no queued replies', async (t) => {
+  resetMemoryStore();
+  const app = createApp({ logger: pino({ level: 'silent' }) });
+  const server = app.listen(0);
+  await new Promise((resolve) => server.once('listening', resolve));
+  t.after(() => new Promise((resolve, reject) => {
+    server.close((error) => error ? reject(error) : resolve());
+  }));
+  setAdminSecret(t);
+  const baseUrl = `http://127.0.0.1:${server.address().port}`;
+  const pairing = await fetch(`${baseUrl}/api/gateway/pairing-code`, {
+    method: 'POST',
+    headers: { 'x-gateway-admin-key': env.gatewayPairingSecret },
+  });
+  const { code } = await pairing.json();
+  const pairBody = JSON.stringify({ deviceId: 'idle-gateway', pairingCode: code });
+  const pair = await fetch(`${baseUrl}/api/gateway/pair`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: pairBody,
+  });
+  const { token } = await pair.json();
+  const originalPollMs = env.outboxLongPollMs;
+  env.outboxLongPollMs = 100;
+  t.after(() => { env.outboxLongPollMs = originalPollMs; });
+
+  const startedAt = Date.now();
+  const response = await fetch(`${baseUrl}/api/gateway/outbox`, {
+    headers: {
+      authorization: `Bearer ${token}`,
+      'x-device-signature': sign(token, ''),
+    },
+  });
+  assert.equal(response.status, 200);
+  assert.deepEqual((await response.json()).items, []);
+  assert.ok(Date.now() - startedAt < 1_500, 'idle polling should return quickly');
+});
+
 test('simulator validates input and uses the mock SMS adapter', async (t) => {
   resetMemoryStore();
   clearMockSms();

@@ -58,7 +58,7 @@ object GatewayApi {
             "POST",
             payload,
             token,
-            timeoutMs = 4_000,
+            timeoutMs = 15_000,
         )
     }
 

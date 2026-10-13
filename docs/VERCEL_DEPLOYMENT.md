@@ -6,6 +6,8 @@ Phase 5 is complete: the backend is deployed on Vercel with durable Supabase sto
 
 The schema enables row-level security and restricts Data API table and RPC access to the backend's `service_role`; the service-role key must stay in Vercel's server-side environment variables.
 
+The gateway uses short outbox polls so an idle phone does not keep a serverless function open long enough to time out. Keep `OUTBOX_LONG_POLL_MS` at or below `4000` milliseconds (the default is `3000`). The deployment also allows up to 60 seconds for serverless work, so inbound research registered with Vercel can finish and enqueue a reply.
+
 ## 1. Create the Supabase project
 
 1. Create a Supabase project and open its SQL Editor.

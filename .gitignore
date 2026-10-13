@@ -13,3 +13,7 @@ android-gateway/**/build/
 *.keystore
 npm-debug.log*
 .DS_Store
+.vercel
+.env
+.env.*
+!.env.example
