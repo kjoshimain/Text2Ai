@@ -2,7 +2,7 @@
 
 This guide deploys the Express backend so the Android gateway can pair with it over HTTPS. The gateway requires durable storage: Vercel instances are ephemeral, so production startup fails if Supabase is not configured. The backend registers its asynchronous research work with Vercel so that work continues after the inbound request has returned.
 
-Phase 5 is complete: the backend is deployed on Vercel with durable Supabase storage. The production health check confirms Supabase and gateway admin configuration, and TinyFish is enabled. Phase 6's live backend deployment is verified; handset pairing and SMS delivery still need a SIM-equipped Android phone. Anthropic/LLM synthesis and Twilio are not configured.
+Phase 5 is complete: the backend is deployed on Vercel with durable Supabase storage. The production health check confirms Supabase and gateway admin configuration, and TinyFish is enabled. Phase 6's live backend deployment is verified. Phase 7 starts with end-to-end handset pairing and SMS delivery on a SIM-equipped Android phone. Anthropic/LLM synthesis and Twilio remain optional until live answer delivery is required.
 
 The schema enables row-level security and restricts Data API table and RPC access to the backend's `service_role`; the service-role key must stay in Vercel's server-side environment variables.
 

@@ -8,7 +8,9 @@ Text2AI is a prototype for an SMS-first research assistant. A gateway phone rece
 
 **Phase 5 — complete.** The backend is deployed on Vercel using durable Supabase storage, and the production health check confirms both are configured. See [docs/VERCEL_DEPLOYMENT.md](./docs/VERCEL_DEPLOYMENT.md).
 
-**Phase 6 — live backend deployment verified; end-to-end handset verification remains.** TinyFish, Supabase, and the gateway administrator configuration are active in production. Anthropic/LLM credentials and Twilio are not configured, and SMS pairing and delivery still need verification on a phone with a SIM; see [docs/VERCEL_DEPLOYMENT.md](./docs/VERCEL_DEPLOYMENT.md).
+**Phase 6 — live backend deployment verified.** TinyFish, Supabase, and the gateway administrator configuration are active in production. Anthropic/LLM credentials and Twilio are not configured, but the deployed backend and admin flow are operational.
+
+**Phase 7 — Android handset verification and end-to-end SMS delivery in progress.** Pair the deployed backend with a SIM-enabled Android phone, validate the HTTPS pairing flow, and confirm inbound questions and outbound replies work end to end. See [docs/VERCEL_DEPLOYMENT.md](./docs/VERCEL_DEPLOYMENT.md).
 
 **Phase 3 — research core implemented; live credentials still required.** Research now runs through TinyFish Search/Fetch and Anthropic JSON synthesis, ranks official domains, retains verified citations, reports staged progress over SSE, and returns an explicit fallback rather than invented evidence when a provider fails. The dashboard consumes the progress stream. Add live provider credentials before expecting completed live answers.
 
@@ -72,6 +74,10 @@ See [.env.example](./.env.example) for defaults and descriptions. To enable live
 - `npm run dev` — start backend and frontend
 - `npm test` — run backend unit/integration tests
 - `npm start` — start backend
+
+## Phase 7 live verification helper
+
+Use the repository helper script at [scripts/phase7-live-check.ps1](./scripts/phase7-live-check.ps1) to validate the deployed backend before you pair the Android gateway phone. It checks `/api/health`, requests a fresh pairing code, and prints the exact Android app input and follow-up device registration commands.
 
 ## Android APK
 
